@@ -1,18 +1,46 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>Assignment2</title>
-	<h2>Assignment 2A: Simple SVG stuff</h2>
-    </head>
-    <body>
-    	<p>5 SVG squares with a gray boundary of width 2, transparency increasing from left to right, dimensions 80x80 and position from bottom left to top right.  </p>
-		<svg width="280" height="140">
-			<rect x="0" y="60" width="80" height="80" fill="purple" stroke="gray" stroke-width="2" opacity="1" />
-			<rect x="50" y="45" width="80" height="80" fill="blue" stroke="gray" stroke-width="2" opacity="0.75" />
-			<rect x="100" y="30" width="80" height="80" fill="green" stroke="gray" stroke-width="2" opacity="0.5" />
-			<rect x="150" y="15" width="80" height="80" fill="yellow" stroke="gray" stroke-width="2" opacity="0.25" />
-			<rect x="200" y="0" width="80" height="80" fill="red" stroke="gray" stroke-width="2" opacity="0.1" />
-		</svg>
-    </body>
+<head>
+	<meta charset="UTF-8">
+	<title>Social Data - Assignments</title>
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/normalize.css">
+	<script>
+	function load_page(url){
+		document.getElementById("content").innerHTML='<object type="text/html" data="'+url+'" width="550" height="800"></object>';
+	}
+	</script>
+</head>
+<body>
+<div class="exercises">
+	<h1 id="header">Exercises</h1>
+	<div class="week-container">
+		<h4>Assignment 2A</h4>
+		<ul>
+			<li><a href ="#" onclick="load_page('Assignment-2A/index.html')"> Simple SVG Stuff </a></li>
+		</ul>
+	</div>
+	<div class="week-container">
+		<h4>Assignment 2B</h4>
+		<ul>
+			<li><a href ="#" onclick="load_page('Assignment-2B/index.html')"> One Scatter plot and two datasets </a></li>
+		</ul>
+	</div>
+	<div class="week-container">
+		<h4>Assignment 2C</h4>
+		<ul>
+			<li><a href ="#" onclick="load_page('Assignment-2C/index.html')"> One barchart and (at least) two datasets </a></li>
+		</ul>
+	</div>
+	<div class="week-container">
+		<h4>Assignment 2D</h4>
+		<ul>
+			<li><a href ="#" onclick="load_page('Assignment-2D/index.html')"> Visualizing geodata </a></li>
+		</ul>
+	</div>
+</div>
+<div class="display-content">
+	<div id ="content"> </div>
+</div>
+</body>
 </html>
