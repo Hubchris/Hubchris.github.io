@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Assignment 2B</title>
+    <script type="text/javascript" src="../d3/d3.js"></script>
+    <style type="text/css">
+        .x-axis path, .y-axis path,
+        .x-axis line, .y-axis line {
+            fill: none;
+            stroke: rgba(50,150,150,1);
+            shape-rendering: crispEdges;
+        }
+
+        .x-axis text, .y-axis text {
+            font-family: sans-serif;
+            font-size: 12px;
+            color: rgba(100,100,200,0.7);
+        }
+
+        #vis1, #vis2 {
+            display: inline-block;
+        }
+    </style>
+
+</head>
+<body>
+    <script type="text/javascript">
+
+        //Width and height
+        var w = 700;
+        var h = 500;
+        var padding = 60;
+
+        var ds;
+        var ds1;  //Dataset 1
+        var ds2;  //Dataset 2
+
+        var xScale;
+        var yScale;
+
+        d3.csv("data/stats2003.csv", function (data1) {                                 //Loading dataset 1
+            data1.forEach(function (d) { d['total'] = +d['total']; });
+            data1.forEach(function (d) { d['vtheft'] = +d['vtheft']; });
+            data1.forEach(function (d) { d['prostitution'] = +d['prostitution']; });
+            ds1 = data1;                                                                //Defining dataset 1
+
+            d3.csv("data/stats2015.csv", function(data2){                               //Loading dataset 2
+            data2.forEach(function (d) { d['total'] = +d['total']; });
+            data2.forEach(function (d) { d['vtheft'] = +d['vtheft']; });
+            data2.forEach(function (d) { d['prostitution'] = +d['prostitution']; });                               
+                ds2 = data2;                                                            //Defining dataset 2
+            
+
+            Draw(ds1);      //Drawing with dataset 1
+
+            });
+        });
+
+
+
+        function Draw(ds)  //Draws everything 
+        {
+
+
+            xScale = d3.scale.linear()                                                          //Defning xScale
+                            .domain([0, d3.max(ds, function (d) { return d.prostitution; })])   //From  0       ->  the max number of prostitute crimes
+                            .range([padding, w - padding * 2]);                                 //To    padding ->  canvas width - padding*2 
+
+            yScale = d3.scale.linear()                                                          //Defining yScale
+                            .domain([0, d3.max(ds, function (d) { return d.vtheft; })])         //From  0                       ->  the max number of vehicle theft crimes
+                            .range([h - padding, padding]);                                     //To    canvas height - padding ->  padding
+
+            radScale = d3.scale.linear()                                                        //Defining the radius
+                            .domain([0, d3.max(ds, function(d) { return d.total; })])           //From  0   ->  the max number of total crimes
+                            .range([0, 15]);                                                    //To    0   ->  15
+
+            var svg = d3.select("body")
+                        .append("svg")
+                        .attr("width", w)
+                        .attr("height", h);
+
+            svg.selectAll("circle")                                     
+               .data(ds)
+               .enter()
+               .append("circle")
+               .attr({
+                   cx: function (d) { return xScale(d.prostitution); },         //x position based on prostitution crime number
+                   cy: function (d) { return yScale(d.vtheft); },               //y position based on vehicle theft crime number
+                   r: function (d) { return radScale(d.total); },               //radius based on total crime number 
+                   "fill": "rgba(0,100,200,0.7)",                               //Color
+                   class: "circle-" + ds.category
+               });
+
+            var xAxisGen = d3.svg.axis().scale(xScale).orient("bottom").ticks(10);
+            var yAxisGen = d3.svg.axis().scale(yScale).orient("left").ticks(10);
+
+            var text = svg.selectAll("text")                            //Setting up labels
+            .attr("class", "labels")
+            .data(ds)
+            .enter()
+            .append("text")
+            .text(function (d) { return d.dist; })
+            .attr("x", function (d) { return xScale(d.prostitution); })
+            .attr("y", function (d) { return yScale(d.vtheft); })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "10px")
+            .attr("fill", "rgba(50,50,50,0.9)");
+
+            var yAxis = svg.append("g").call(yAxisGen)                          //Setting up the Y-Axis
+                .attr("class", "y-axis")
+                .attr("transform", "translate(" + 60 + ", 0)")
+                .append("text")
+                .attr("text-anchor", "end")
+                .attr("y", 6)
+                .attr("dy", ".75em")
+                .attr("transform", d3.transform('translate(-60,200) rotate(-90)').toString())
+                .text("Vehicle Theft Incidents");
+
+            var xAxis = svg.append("g").call(xAxisGen)                          //Setting up the X-Axis
+                .attr("class", "x-axis")
+                .attr("transform", "translate(" + 0 + "," + (h - 50) + ")")
+                .append("text")
+                .attr("class", "x-label")
+                .attr("text-anchor", "end")
+                .attr("x", w)
+                .attr("y", h - 6)
+                .attr("transform", d3.transform('translate(-340, -460)').toString())
+                .text("Prostitution Incidents");
+        }
+        function UpdateDraw()
+        {
+
+            //Transition is put here along with new data
+        }
+
+    </script>
+
+
+    <div>
+        <button id="button2003">Year 2003</button>
+        <button id="button2015">Year 2015</button>
+    </div>
+
+
+    <script>
+
+
+
+    document.getElementById("button2015").onclick = function () {
+        document.body.innerHTML = '';                                       //This does not seem to work as desired.
+        Draw(ds2);
+        }
+
+    document.getElementById("button2003").onclick = function () {
+        document.body.innerHTML = '';
+        Draw(ds1);
+        }
+
+
+
+
+    </script>
+
+</body>
+</html>
