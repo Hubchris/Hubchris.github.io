@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Assignment 2B</title>
+    <script type="text/javascript" src="../d3/d3.js"></script>
+    <style type="text/css">
+        .x-axis path, .y-axis path,
+        .x-axis line, .y-axis line {
+            fill: none;
+            stroke: rgba(50,75,150,1);
+            shape-rendering: auto;
+        }
+
+        .x-axis text, .y-axis text {
+            font-family: arial;
+            font-size: 12px;
+            color: rgba(100,100,200,0.7);
+        }
+
+    </style>
+
+</head>
+<body>
+    <div id="canvas">
+        <h2>Assignment 2B</h2>
+        <p> Visualizing the SF crime data using apropriate dynamic scales. Each point corresponds to a district as indicated by labels. The radius of a point is proportional to the total number of crimes in each district. 
+            The x-axis corresponds to total number of prostitution incidents and the y-axis corresponds to total number of vehicle theft incidents. Choose between 2003 and 2015 to see their corresponding data.</p>
+        <p>
+            Select year:
+            <select class="selectdate" id="dates">
+                <option value="data1">Data from 2003</option>
+                <option value="data2">Data from 2015</option>
+            </select>
+        </p>
+    </div>
+    <script type="text/javascript">
+
+        //Width and height
+        var w = 700;
+        var h = 500;
+        var padding = 60;
+
+        var data;
+        var data1;  //Dataset 1
+        var data2;  //Dataset 2
+
+        var xScale;
+        var yScale;
+
+        d3.csv("data/total2003.csv", function (data1) {                                 //Loading daataset 1
+            data1.forEach(function (d) { d['total'] = +d['total']; });
+            data1.forEach(function (d) { d['vtheft'] = +d['vtheft']; });
+            data1.forEach(function (d) { d['prostitution'] = +d['prostitution']; });
+            data1 = data1;                                                                //Defining dataset 1
+
+            d3.csv("data/total2015.csv", function (data2) {                               //Loading dataset 2
+                data2.forEach(function (d) { d['total'] = +d['total']; });
+                data2.forEach(function (d) { d['vtheft'] = +d['vtheft']; });
+                data2.forEach(function (d) { d['prostitution'] = +d['prostitution']; });
+                data2 = data2;                                                            //Defining dataset 2
+
+            Draw(data1);      //Drawing with dataset 1
+  
+            d3.select(".selectdate")
+                        .on("change", function (d, i) {
+                            var sel = "";
+                            sel = String(d3.select("#dates").node().value);
+
+                            if (sel == "data1") { UpdateDraw(data1); }
+                            else { UpdateDraw(data2); }
+                        });
+            });
+        });
+
+        function Draw(data)  //Draws everything 
+        {
+            xScale = d3.scale.linear()                                                          //Defning xScale
+                            .domain([0, d3.max(data, function (d) { return d.prostitution; })])   //From  0       ->  the max number of prostitute crimes
+                            .range([padding, w - padding * 2]);                                 //To    padding ->  canvas width - padding*2 
+
+            yScale = d3.scale.linear()                                                          //Defining yScale
+                            .domain([0, d3.max(data, function (d) { return d.vtheft; })])         //From  0                       ->  the max number of vehicle theft crimes
+                            .range([h - padding, padding]);                                     //To    canvas height - padding ->  padding
+
+            rScale = d3.scale.linear()                                                        //Defining the radius
+                            .domain([0, d3.max(data, function(d) { return d.total; })])           //From  0   ->  the max number of total crimes
+                            .range([0, 15]);                                                    //To    0   ->  15
+
+            var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", w)
+                    .attr("height", h)
+
+            svg.selectAll("circle")                                     
+               .data(data)
+               .enter()
+               .append("circle")
+               .attr({
+                   cx: function (d) { return xScale(d.prostitution); },         //x position based on prostitution crime number
+                   cy: function (d) { return yScale(d.vtheft); },               //y position based on vehicle theft crime number
+                   r: function (d) { return rScale(d.total); },               //radius based on total crime number 
+                   "fill": "rgba(0,100,200,0.7)",                               //Color
+                   class: "circle-" + data.category
+               });
+
+            var xAxis = d3.svg.axis()
+                .scale(xScale)
+                .orient("bottom")
+                .ticks(15);
+
+            var yAxis = d3.svg.axis()
+                .scale(yScale)
+                .orient("left")
+                .ticks(15);
+
+            var text = svg.selectAll("text")                            //Setting up labels
+            .attr("class", "labels")
+            .data(data)
+            .enter()
+            .append("text")
+            .text(function (d) { return d.dist; })
+            .attr("x", function (d) { return xScale(d.prostitution); })
+            .attr("y", function (d) { return yScale(d.vtheft); })
+            .attr("font-family", "arial")
+            .attr("font-size", "10px")
+            .attr("fill", "rgba(50,50,50,0.9)");
+
+            var yAxis = svg.append("g").call(yAxis)                          //Setting up the Y-Axis
+                .attr("class", "y-axis")
+                .attr("transform", "translate(" + 60 + ", 0)")
+                .append("text")
+                .attr("text-anchor", "end")
+                .attr("y", 6)
+                .attr("dy", ".75em")
+                .attr("transform", d3.transform('translate(-60,200) rotate(-90)').toString())
+                .text("Vehicle Theft Incidents");
+
+            var xAxis = svg.append("g").call(xAxis)                          //Setting up the X-Axis
+                .attr("class", "x-axis")
+                .attr("transform", "translate(" + 0 + "," + (h - 50) + ")")
+                .append("text")
+                .attr("class", "x-label")
+                .attr("text-anchor", "end")
+                .attr("x", w)
+                .attr("y", h - 6)
+                .attr("transform", d3.transform('translate(-340, -460)').toString())
+                .text("Prostitution Incidents");
+        }
+
+        function UpdateDraw(data)
+        {
+            xScale = d3.scale.linear()                                                          //Defning xScale
+                            .domain([0, 713])                                                   //From  0       ->  the max number of prostitute crimes
+                            .range([padding, w - padding * 2]);                                 //To    padding ->  canvas width - padding*2 
+
+            yScale = d3.scale.linear()                                                          //Defining yScale
+                            .domain([0, 2319])                                                  //From  0                       ->  the max number of vehicle theft crimes
+                            .range([h - padding, padding]);                                     //To    canvas height - padding ->  padding
+
+            rScale = d3.scale.linear()                                                          //Defining the radius
+                            .domain([0, 25692])                                                  //From  0   ->  the max number of total crimes
+                            .range([0, 15]);                                                    //To    0   ->  15
+
+            var xAxis = d3.svg.axis()
+                .scale(xScale)
+                .orient("bottom")
+                .ticks(15);
+
+            var yAxis = d3.svg.axis()
+                .scale(yScale)
+                .orient("left")
+                .ticks(15);
+
+            var svg = d3.select("body")
+                    .select("svg");
+
+            svg.selectAll("circle")
+               .data(data)
+               .transition()
+               .delay(250)
+               .duration(1500)
+               .attr({
+                   cx: function (d) { return xScale(d.prostitution); },         //x position based on prostitution crime number
+                   cy: function (d) { return yScale(d.vtheft); },               //y position based on vehicle theft crime number
+                   r: function (d) { return rScale(d.total); },                 //radius based on total crime number 
+                   "fill": "rgba(0,100,200,0.7)",                               //Color
+                   class: "circle-" + data.category
+               });
+
+            var text = svg.selectAll("text")                                    //Setting up labels
+           .attr("class", "labels")
+           .data(data)
+           .transition()
+           .delay(250)
+           .duration(1500)
+           .text(function (d) { return d.dist; })
+           .attr("x", function (d) { return xScale(d.prostitution); })
+           .attr("y", function (d) { return yScale(d.vtheft); })
+           .attr("font-family", "arial")
+           .attr("font-size", "10px")
+           .attr("fill", "rgba(50,50,50,0.9)");
+        }
+    </script>
+
+    <p>
+      By having the axes remain the same, data is visualized as proportional to the axes. As a result the tendency towards less prostitution and less vehicle theft becomes much more apparent.   
+    </p>
+</body>
+</html>
