@@ -11,12 +11,24 @@
             stroke: rgba(50,75,150,1);
             shape-rendering: crispEdges;
         }
-
         .axis text {
             font-family: arial;
             font-size: 12px;
             color: rgba(100,100,200,0.7);
         }
+        .tooltip {
+				position: absolute;
+				width: 170px;
+				height: 60px;
+				pointer-events: none;
+                line-height: 1;
+
+                font-weight: bold;
+                padding: 8px;
+                background: rgba(0, 0, 0, 0.8);
+                color: #fff;
+                border-radius: 2px;
+			}
     </style>
 
 </head>
@@ -43,13 +55,13 @@
         var data1;  //Dataset 1
         var data2;  //Dataset 2
 
-        d3.csv("data/data1997v2.csv", function (data1) {                                 //Loading daataset 1
+        d3.csv("data/data1997v3.csv", function (data1) {                                 //Loading daataset 1
             data1.forEach(function (d) { d['TOTAL'] = +d['TOTAL']; });
             data1.forEach(function (d) { d['HIGH'] = +d['HIGH']; });
             data1.forEach(function (d) { d['LOW'] = +d['LOW']; });
             data1 = data1;                                                                //Defining dataset 1
 
-            d3.csv("data/data2013v2.csv", function (data2) {                               //Loading dataset 2
+            d3.csv("data/data2013v3.csv", function (data2) {                               //Loading dataset 2
                 data2.forEach(function (d) { d['TOTAL'] = +d['TOTAL']; });
                 data2.forEach(function (d) { d['HIGH'] = +d['HIGH']; });
                 data2.forEach(function (d) { d['LOW'] = +d['LOW']; }); //prost = LOW    Vtheft = HIGH    total = TOAL
@@ -81,7 +93,11 @@
 
         var rScale = d3.scale.linear()                                                        //Defining the radius
                         .domain([0, d3.max(data1, function (d) { return d.TOTAL; })])           //From  0   ->  the max number of total crimes
-                        .range([0, 15]);                                                    //To    0   ->  15
+                        .range([0, 25]);                                                    //To    0   ->  15
+
+        var tooltip = d3.select("body").append("div")
+                        .attr("class", "tooltip")
+                        .style("opacity", 0);
 
         //Define X axis
         var xAxis = d3.svg.axis()
@@ -111,7 +127,34 @@
                   r: function (d) { return rScale(d.TOTAL); },               //radius based on total crime number 
                   "fill": "rgba(0,100,200,0.7)",                               //Color
                   class: "circle-" + data1.category
-              });
+              })
+            .on("mouseover", function (d) {
+                d3.select(this)
+                    .style("fill", "green");
+
+                tooltip.transition()
+                        .duration(200)
+                        .style("opacity", 1)
+                        .style("color", "white")
+                        .style("font-weight", "bold")
+                        .style("text-shadow", "-1px -1px 0 #000, 1px -1px 0 #000,-1px 1px 0 #000, 1px 1px 0 #000")
+                        .attr("font-size", "11px");
+                tooltip
+                        .html(d.BYDEL + '<br>' + "Low income:" + d.LOW + '<br>' + "High lincome:" + d.HIGH + '<br>' + "Total citizens: " + d.TOTAL)
+                        .style("left", (d3.event.pageX + 1) + "px")
+                        .style("top", (d3.event.pageY - 58) + "px");
+            })
+                        .on("mouseout", function (d) {
+
+                            d3.select(this)
+                                .transition()
+                                .duration(250)
+                                .style("fill", "rgba(0,100,200,0.7)");
+
+                            tooltip.transition()
+                                    .duration(500)
+                                    .style("opacity", 0);
+                        });
 
         var text = svg.selectAll("text")                            //Setting up labels
                                 .attr("class", "labels")
@@ -122,7 +165,7 @@
                                 .attr("x", function (d) { return xScale(d.LOW); })
                                 .attr("y", function (d) { return yScale(d.HIGH); })
                                 .attr("font-family", "arial")
-                                .attr("font-size", "10px")
+                                .attr("font-size", "12px")
                                 .attr("fill", "rgba(50,50,50,0.9)");
 
         svg.append("g")
@@ -201,7 +244,7 @@
            .attr("x", function (d) { return xScale(d.LOW); })
            .attr("y", function (d) { return yScale(d.HIGH); })
            .attr("font-family", "arial")
-           .attr("font-size", "10px")
+           .attr("font-size", "12px")
            .attr("fill", "rgba(50,50,50,0.9)");
         }
 
