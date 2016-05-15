@@ -8,24 +8,26 @@
         .axis path,
         .axis line {
             fill: none;
-            stroke: rgba(50,75,150,1);
+            stroke-width: 2px;
+            stroke: rgb(52, 152, 219);
             shape-rendering: crispEdges;
         }
         .axis text {
-            font-family: arial;
+            font-family: helvetica;
             font-size: 12px;
-            color: rgba(100,100,200,0.7);
+           
+            color: rgb(44, 62, 80);
         }
         .tooltip {
 				position: absolute;
-				width: 170px;
-				height: 60px;
+				width: 200px;
+				height: 70px;
 				pointer-events: none;
                 line-height: 1;
 
                 font-weight: bold;
-                padding: 8px;
-                background: rgba(0, 0, 0, 0.8);
+                padding: 9px;
+                background: rgb(26, 188, 156);
                 color: #fff;
                 border-radius: 2px;
 			}
@@ -46,10 +48,13 @@
             </select>
         </p>
     </div>
+    <div id="area2"></div>
     <script type="text/javascript">
+
         //Width and height
-        var w = 700;
-        var h = 500;
+        var margin = { top: 20, right: 20, bottom: 30, left: 40 };
+        var w = 960 - margin.left - margin.right;
+        var h = 600 - margin.top - margin.bottom;
         var padding = 60;
 
         var data1;  //Dataset 1
@@ -95,7 +100,7 @@
                         .domain([0, d3.max(data1, function (d) { return d.TOTAL; })])           //From  0   ->  the max number of total crimes
                         .range([0, 25]);                                                    //To    0   ->  15
 
-        var tooltip = d3.select("body").append("div")
+        var tooltip = d3.select("#area2").append("div")
                         .attr("class", "tooltip")
                         .style("opacity", 0);
 
@@ -103,19 +108,18 @@
         var xAxis = d3.svg.axis()
             .scale(xScale)
             .orient("bottom")
-            .ticks(15);
+            .tickFormat(d3.format(".2s"));
 
         //Define Y Axis
         var yAxis = d3.svg.axis()
             .scale(yScale)
             .orient("left")
-            .ticks(15);
+            .tickFormat(d3.format(".2s"));
 
-        var svg = d3.select("body")
+        var svg = d3.select("#area2")
                    .append("svg")
-                   .attr("width", w)
+                   .attr("width", w + 10)
                    .attr("height", h);
-
 
         svg.selectAll("circle")
               .data(data1)
@@ -125,19 +129,19 @@
                   cx: function (d) { return xScale(d.LOW); },         //x position based on prostitution crime number
                   cy: function (d) { return yScale(d.HIGH); },               //y position based on vehicle theft crime number
                   r: function (d) { return rScale(d.TOTAL); },               //radius based on total crime number 
-                  "fill": "rgba(0,100,200,0.7)",                               //Color
+                  "fill": "rgb(52, 152, 219)",                               //Color
                   class: "circle-" + data1.category
               })
             .on("mouseover", function (d) {
                 d3.select(this)
-                    .style("fill", "green");
+                    .style("fill", "rgb(26, 188, 156)");
 
                 tooltip.transition()
                         .duration(200)
                         .style("opacity", 1)
                         .style("color", "white")
+                        .style("font-family", "helvetica")
                         .style("font-weight", "bold")
-                        .style("text-shadow", "-1px -1px 0 #000, 1px -1px 0 #000,-1px 1px 0 #000, 1px 1px 0 #000")
                         .attr("font-size", "11px");
                 tooltip
                         .html(d.BYDEL + '<br>' + "Low income:" + d.LOW + '<br>' + "High lincome:" + d.HIGH + '<br>' + "Total citizens: " + d.TOTAL)
@@ -164,9 +168,10 @@
                                 .text(function (d) { return d.BYDEL; })
                                 .attr("x", function (d) { return xScale(d.LOW); })
                                 .attr("y", function (d) { return yScale(d.HIGH); })
-                                .attr("font-family", "arial")
-                                .attr("font-size", "12px")
-                                .attr("fill", "rgba(50,50,50,0.9)");
+                                .style("font-weight", "bold")
+                                .attr("font-family", "helvetica")
+                                .attr("font-size", "15px")
+                                .attr("fill", "rgb(44, 62, 80)");
 
         svg.append("g")
                 .attr("class", "y axis")
@@ -188,7 +193,7 @@
                     .attr("text-anchor", "end")
                     .attr("x", w)
                     .attr("y", h - 6)
-                    .attr("transform", d3.transform('translate(-340, -460)').toString())
+                    .attr("transform", d3.transform('translate(-425, -500)').toString())
                     .text("Low-income citizens");
     
         function UpdateDraw(data) {
@@ -201,13 +206,13 @@
             var xAxis = d3.svg.axis()
                 .scale(xScale)
                 .orient("bottom")
-                .ticks(15);
+                .tickFormat(d3.format(".2s"));
 
             //Define Y Axis
             var yAxis = d3.svg.axis()
                 .scale(yScale)
                 .orient("left")
-                .ticks(15);
+                .tickFormat(d3.format(".2s"));
 
             //Update X axis
             svg.selectAll(".x.axis")
@@ -230,7 +235,7 @@
                    cx: function (d) { return xScale(d.LOW); },                  //x position based on prostitution crime number
                    cy: function (d) { return yScale(d.HIGH); },                 //y position based on vehicle theft crime number
                    r: function (d) { return rScale(d.TOTAL); },                 //radius based on total crime number 
-                   "fill": "rgba(0,100,200,0.7)",                               //Color
+                   "fill": "rgb(52, 152, 219)",                               //Color
                    class: "circle-" + data.category
                });
 
@@ -243,9 +248,9 @@
            .text(function (d) { return d.BYDEL; })
            .attr("x", function (d) { return xScale(d.LOW); })
            .attr("y", function (d) { return yScale(d.HIGH); })
-           .attr("font-family", "arial")
-           .attr("font-size", "12px")
-           .attr("fill", "rgba(50,50,50,0.9)");
+           .attr("font-family", "helvetica")
+           .attr("font-size", "15px")
+           .attr("fill", "rgb(44, 62, 80)");
         }
 
         });
