@@ -54,6 +54,9 @@
             </select>
         </p>
     </div>
+    <p></p>
+    <div id="area1"></div>
+    <p><br></p>
     <script type="text/javascript">
 
         //Width and height
@@ -183,13 +186,13 @@
                             .range(["#1E90FF", "#0000CD", "#191970"]);
 
 
-            var svg = d3.select("body").append("svg")
+            var svg = d3.select("#area1").append("svg")
                                 .attr("width", w + margin.left + margin.right)
                                 .attr("height", h + margin.top + margin.bottom)
                         .append("g")
                                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            var tooltip = d3.select("body").append("div")
+            var tooltip = d3.select("#area1").append("div")
 							.attr("class", "tooltip")
 							.style("opacity", 0);
 
@@ -286,7 +289,7 @@
 
             function UpdateDraw(data, socgroup)
             {
-
+            
             data.forEach(function (d) {
                             d.group = socgroup.map(function (name) { return { name: name, value: +d[name] }; }); });
 
