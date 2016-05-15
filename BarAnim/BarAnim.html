@@ -9,25 +9,26 @@
     .axis path,
     .axis line {
         fill: none;
-        stroke: rgba(50,75,150,1);
+        stroke-width: 2px;
+        stroke: rgb(52, 152, 219);
         shape-rendering: crispEdges;
     }
 
     .axis text {
-        font-family: arial;
+        font-family: helvetica;
         font-size: 12px;
-        color: rgba(100,100,200,0.7);
+        color: rgb(44, 62, 80);
     }
     .tooltip {
 				position: absolute;
-				width: 120px;
+				width: 100px;
 				height: 28px;
 				pointer-events: none;
                 line-height: 1;
 
                 font-weight: bold;
                 padding: 8px;
-                background: rgba(0, 0, 0, 0.8);
+                background: rgb(26, 188, 156);
                 color: #fff;
                 border-radius: 2px;
 			}
@@ -39,7 +40,7 @@
         <h2>Assignment 2C</h2>
         <p> </p>
         <p>
-            Select crime:
+            Select district:
             <select class="selectcrime" id="crimes">
                 <option value="data1">Indre By</option>
                 <option value="data2">Noerrebro</option>
@@ -173,7 +174,7 @@
             // .rangeRoundBands([0, w], 0.05);
 
             xScale0 = d3.scale.ordinal().domain(data1.map(function (d) { return d.AAR; }))
-                            .rangeRoundBands([0, w], .1);
+                            .rangeRoundBands([0, w-50], .1);
 
             xScale1 = d3.scale.ordinal().domain(socgroups)
                             .rangeRoundBands([0, xScale0.rangeBand()]);
@@ -183,7 +184,7 @@
 							.range([h, 0]);
             
             var color = d3.scale.ordinal()
-                            .range(["#1E90FF", "#0000CD", "#191970"]);
+                            .range(["#3498DB", "#2980B9", "#34495E"]);
 
 
             var svg = d3.select("#area1").append("svg")
@@ -240,17 +241,17 @@
                     .style("fill", function (d) { return color(d.name); })
                     .on("mouseover", function (d) {
                         d3.select(this)
-                            .style("fill", "green");
+                            .style("fill", "rgb(26, 188, 156)");
 
                         tooltip.transition()
                                 .duration(200)
                                 .style("opacity", 1)
                                 .style("color", "white")
+                                .style("font-family", "helvetica")
                                 .style("font-weight", "bold")
-                                .style("text-shadow", "-1px -1px 0 #000, 1px -1px 0 #000,-1px 1px 0 #000, 1px 1px 0 #000")
                                 .attr("font-size", "11px");
                         tooltip
-                                .html("Population: " + d.value)
+                                .html("Population " + d.value)
                                 .style("left", (d3.event.pageX + 1) + "px")
                                 .style("top", (d3.event.pageY - 58) + "px");
                     })
@@ -294,7 +295,7 @@
                             d.group = socgroup.map(function (name) { return { name: name, value: +d[name] }; }); });
 
             xScale0 = d3.scale.ordinal().domain(data.map(function (d) { return d.AAR; }))
-                            .rangeRoundBands([0, w], .1);
+                            .rangeRoundBands([0, w-50], .1);
             xScale1 = d3.scale.ordinal().domain(socgroup)
                             .rangeRoundBands([0, xScale0.rangeBand()]);
             yScale = d3.scale.linear()
@@ -302,7 +303,7 @@
 							.range([h, 0]);
 
             var color = d3.scale.ordinal()
-                            .range(["#1E90FF", "#0000CD", "#191970"]);
+                            .range(["#3498DB", "#2980B9", "#34495E"]);
                 
                 //Defining the Y axis
             var yAxis = d3.svg.axis()
