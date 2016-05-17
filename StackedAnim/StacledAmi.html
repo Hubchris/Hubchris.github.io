@@ -56,6 +56,7 @@
                 <option value="data2">2013</option>
             </select>
         </p>
+        <div id="area3"></div>
     </div>
     <script>
 
@@ -84,7 +85,7 @@
         var data1;
         var data2;
      
-        var svg = d3.select("body").append("svg")
+        var svg = d3.select("#area3").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
           .append("g")
