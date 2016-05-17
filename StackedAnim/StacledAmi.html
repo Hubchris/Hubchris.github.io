@@ -1,0 +1,245 @@
+﻿<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<style>
+    body {
+        font: 12px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke-width: 2px;
+        stroke: rgb(52, 152, 219);
+        shape-rendering: crispEdges;
+    }
+
+    .bar {
+        fill: steelblue;
+    }
+
+    .x.axis path {
+        display: none;
+    }
+
+    .legend line {
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+    .button {
+				display: inline-block;
+				padding: 12px 16px;
+				font-size: 15px;
+				cursor: pointer;
+				text-align: center;	
+				text-decoration: none;
+				outline: none;
+				box-shadow: 0 1px #999;
+				background-color: white; 
+				color: black; 
+				border: 2px solid #555555;
+			}
+
+			.button:active {
+				transform: translateY(2px);
+			}
+</style>
+<body>
+    <script src="//d3js.org/d3.v3.min.js"></script>
+
+    <button id="button1997" class="button">1997</button>
+    <button id="button2013" class="button">2013</button>
+    <div id="canvas">
+        <h2>Assignment 2C</h2>
+        <p> </p>
+        <p>
+            Select crime:
+            <select class="selectcrime" id="crimes">
+                <option value="data1">1997</option>
+                <option value="data2">2013</option>
+            </select>
+        </p>
+    </div>
+    <script>
+
+        var margin = { top: 20, right: 100, bottom: 30, left: 40 },
+            width = 960 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+        var x = d3.scale.ordinal()
+            .rangeRoundBands([0, width], .1);
+
+        var y = d3.scale.linear()
+            .rangeRound([height, 0]);
+
+        var color = d3.scale.ordinal()
+            .range(["#98abc5", "#3498DB", "#2980B9", "#34495E", "#8a89a6", "#7b6888", "#6b486b"]);
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left")
+            .tickFormat(d3.format(".0%"));
+
+        var data1;
+        var data2;
+     
+        var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.csv("data/dataSæt5AAR1997.csv", function (csv1) {
+            data1 = csv1;
+            d3.csv("data/dataSæt5AAR2013.csv", function (csv2) {
+                data2 = csv2;
+
+                color.domain(d3.keys(data1[0]).filter(function (key) { return key !== "BYDEL"; }));
+
+                data1.forEach(function (d) {
+                    var y0 = 0;
+                    d.ages = color.domain().map(function (name) { return { name: name, y0: y0, y1: y0 += +d[name] }; });
+                    d.ages.forEach(function (d) { d.y0 /= y0; d.y1 /= y0; });
+                });
+
+                data1.sort(function (a, b) { return b.ages[0].y1 - a.ages[0].y1; });
+
+                x.domain(data1.map(function (d) { return d.BYDEL; }));
+
+                svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis);
+
+                svg.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis);
+
+                var BYDEL = svg.selectAll(".BYDEL")
+                    .data(data1)
+                  .enter().append("g")
+                    .attr("class", "BYDEL")
+                    .attr("transform", function (d) { return "translate(" + x(d.BYDEL) + ",0)"; });
+
+                BYDEL.selectAll("rect")
+                    .data(function (d) { return d.ages; })
+                  .enter().append("rect")
+                    .attr("width", x.rangeBand())
+                    .attr("y", function (d) { return y(d.y1); })
+                    .attr("height", function (d) { return y(d.y0) - y(d.y1); })
+                    .style("fill", function (d) { return color(d.name); });
+
+                var legend = svg.select(".BYDEL:last-child").selectAll(".legend")
+                    .data(function (d) { return d.ages; })
+                  .enter().append("g")
+                    .attr("class", "legend")
+                    .attr("transform", function (d) { return "translate(" + x.rangeBand() / 2 + "," + y((d.y0 + d.y1) / 2) + ")"; });
+
+                legend.append("line")
+                    .attr("x2", 10);
+
+                legend.append("text")
+                    .attr("x", 13)
+                    .attr("dy", ".35em")
+                    .text(function (d) { return d.name; });
+
+                //On click, update with new data			
+                d3.selectAll("#button1997, #button2013")
+                    .on("click", function () {
+
+                        //See which button was clicked
+                        var ID = d3.select(this).attr("id")
+
+                        //Decide which dataset to load
+                        if (ID == "button1997") {
+                            x = document.getElementById("button1997");
+                            x.style.backgroundColor = "white";
+                            x.style.color = "black";
+                            this.style.backgroundColor = "#008CBA";
+                            UpdateDraw(data1);
+                        }
+                        else if (ID == "button2013") {
+                            x = document.getElementById("button2013");
+                            x.style.backgroundColor = "white";
+                            x.style.color = "black";
+                            this.style.backgroundColor = "#008CBA";
+                            UpdateDraw(data2);
+                        }
+                    });
+                d3.select(".selectcrime")
+                      .on("change", function (d, i)
+                      {
+                          var sel = "";
+                          sel = String(d3.select("#crimes")
+                              .node()
+                              .value);
+
+                          if (sel == "data1")
+                          {
+                              UpdateDraw(data1);
+                          }
+                          else if (sel == "data2")
+                          {
+                              UpdateDraw(data2);
+                          }
+                          
+                      });
+
+                function UpdateDraw(data)
+                {
+                    console.log(data1, data2)
+                    var color = d3.scale.ordinal()
+                            .range(["#98abc5", "#3498DB", "#2980B9", "#34495E", "#8a89a6", "#7b6888", "#6b486b"]);
+
+                    color.domain(d3.keys(data[0]).filter(function (key) { return key !== "BYDEL"; }));
+
+                    data.forEach(function (d) {
+                        var y0 = 0;
+                        d.ages = color.domain().map(function (name) { return { name: name, y0: y0, y1: y0 += +d[name] }; });
+                        d.ages.forEach(function (d) { d.y0 /= y0; d.y1 /= y0; });
+                    });
+
+                    var x = d3.scale.ordinal().domain(data.map(function (d) { return d.BYDEL; }))
+                        .rangeRoundBands([0, width], .1);
+
+                    var y = d3.scale.linear()
+                        .rangeRound([height, 0]);
+
+                    //Define the Y axis
+                    var yAxis = d3.svg.axis()
+                        .scale(y)
+                        .orient("left")
+                        .tickFormat(d3.format(".0%"));
+
+                    //Update Y axis
+                    svg.selectAll(".y.axis")
+                        .transition()
+                        .duration(1000)
+                        .call(y);
+
+                    var BYDEL = svg.selectAll(".BYDEL")
+                          .data(data)
+                          .attr("class", "BYDEL")
+                          .attr("transform", function (d) { return "translate(" + x(d.BYDEL) + ",0)"; });
+
+                    BYDEL.selectAll("rect")
+                        .data(function (d) { return d.ages; })
+                        .transition()
+                        .duration(1000)
+                        .attr("width", x.rangeBand())
+                        .attr("y", function (d) { return y(d.y1); })
+                        .attr("height", function (d) { return y(d.y0) - y(d.y1); })
+                        .style("fill", function (d) { return color(d.name); });
+
+                }
+            });
+        });
+
+    </script>
+
+</body>
+</html>
